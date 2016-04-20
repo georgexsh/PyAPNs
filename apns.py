@@ -534,7 +534,7 @@ class GatewayConnection(APNsConnection):
             self._error_response_handler_worker.close()
 
     def _is_idle_timeout(self):
-        TIMEOUT_IDLE = 30
+        TIMEOUT_IDLE = 5
         return (time.time() - self._last_activity_time) >= TIMEOUT_IDLE
 
     class ErrorResponseHandlerWorker(threading.Thread):
