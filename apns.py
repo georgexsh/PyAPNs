@@ -195,50 +195,15 @@ class APNsConnection(object):
     def _connect(self):
         # Establish an SSL connection
         _logger.debug("%s APNS connection establishing..." % self.__class__.__name__)
-
-        # Fallback for socket timeout.
-        for i in range(3):
-            try:
-                self._socket = socket(AF_INET, SOCK_STREAM)
-                self._socket.settimeout(self.timeout)
-                self._socket.connect((self.server, self.port))
-                break
-            except timeout:
-                pass
-            except:
-                raise
-
-        if self.enhanced:
-            self._last_activity_time = time.time()
-            self._socket.setblocking(False)
-            self._ssl = wrap_socket(self._socket, self.key_file, self.cert_file,
-                                        do_handshake_on_connect=False)
-            while True:
-                try:
-                    self._ssl.do_handshake()
-                    break
-                except ssl.SSLError as err:
-                    if ssl.SSL_ERROR_WANT_READ == err.args[0]:
-                        select.select([self._ssl], [], [])
-                    elif ssl.SSL_ERROR_WANT_WRITE == err.args[0]:
-                        select.select([], [self._ssl], [])
-                    else:
-                        raise
-
-        else:
-            # Fallback for 'SSLError: _ssl.c:489: The handshake operation timed out'
-            for i in range(3):
-                try:
-                    self._ssl = wrap_socket(self._socket, self.key_file, self.cert_file)
-                    break
-                except SSLError as ex:
-                    if ex.args[0] == SSL_ERROR_WANT_READ:
-                        sys.exc_clear()
-                    elif ex.args[0] == SSL_ERROR_WANT_WRITE:
-                        sys.exc_clear()
-                    else:
-                       raise
-
+        self._socket = socket(AF_INET, SOCK_STREAM)
+        if self.timeout is None:
+            raise Exception('socket should in blocking mode')
+        self._socket.settimeout(self.timeout)
+        self._last_activity_time = time.time()
+        self._ssl = wrap_socket(self._socket, self.key_file, self.cert_file,
+                                do_handshake_on_connect=False)
+        self._ssl.connect((self.server, self.port))
+        self._ssl.do_handshake()
         self.connection_alive = True
         _logger.debug("%s APNS connection established" % self.__class__.__name__)
 
