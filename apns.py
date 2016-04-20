@@ -95,7 +95,7 @@ ER_IDENTIFER = 'identifier'
 class APNs(object):
     """A class representing an Apple Push Notification service connection"""
 
-    def __init__(self, use_sandbox=False, cert_file=None, key_file=None, enhanced=False):
+    def __init__(self, use_sandbox=False, cert_file=None, key_file=None, enhanced=False, timeout=60):
         """
         Set use_sandbox to True to use the sandbox (test) APNs servers.
         Default is False.
@@ -107,6 +107,7 @@ class APNs(object):
         self._feedback_connection = None
         self._gateway_connection = None
         self.enhanced = enhanced
+        self.timeout = timeout
 
     @staticmethod
     def packed_uchar(num):
@@ -168,7 +169,8 @@ class APNs(object):
                 use_sandbox = self.use_sandbox,
                 cert_file = self.cert_file,
                 key_file = self.key_file,
-                enhanced = self.enhanced
+                enhanced = self.enhanced,
+                timeout = self.timeout
             )
         return self._gateway_connection
 
@@ -177,7 +179,7 @@ class APNsConnection(object):
     """
     A generic connection class for communicating with the APNs
     """
-    def __init__(self, cert_file=None, key_file=None, timeout=None, enhanced=False):
+    def __init__(self, cert_file=None, key_file=None, timeout=60, enhanced=False):
         super(APNsConnection, self).__init__()
         self.cert_file = cert_file
         self.key_file = key_file
